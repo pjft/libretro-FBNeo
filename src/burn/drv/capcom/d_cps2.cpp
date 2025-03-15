@@ -497,6 +497,7 @@ STDINPUTINFO(Dimahoo)
 
 /// Rotation stuff! -dink, pjft
 static UINT8 DrvFakeInput[14]      = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // 0-5 legacy; 6-9 P1, 10-13 P2
+static UINT8 DrvFakeInput1[2]      = {0, 0}; // shoot charge shot
 static INT32 nRotateTarget[2]      = {0, 0};
 static UINT8 nAutoFireCounter[2]   = {0, 0};
 
@@ -757,8 +758,23 @@ static void SuperJoy2Rotate() {
 			}
 		}
 
-		if (nAutoFireCounter[i]) {
+		/*if (nAutoFireCounter[i]) {
 			*curr_input |= 1<<4; // fire!!
+
+			nAutoFireCounter[i]--;
+		}*/
+
+		if (nAutoFireCounter[i]) {
+			UINT8 no_fire = DrvFakeInput1[i];
+
+			if (no_fire) {
+				// If "no fire" is pressed in "Moves & Shoots" mode, we
+				// disable fire so that the Option (Satellite) can
+				// be moved, it can be used as a sheild! :)
+				*curr_input &= ~(1<<4); // clear fire bit
+			} else {
+				*curr_input |= 1<<4; // fire!!
+			}
 
 			nAutoFireCounter[i]--;
 		}
@@ -782,6 +798,7 @@ static struct BurnInputInfo EcofghtrInputList[] = {
 	{"P1 Attack"        , BIT_DIGITAL  , CpsInp001+5, "p1 fire 2" },
 	{"P1 Turn 2"        , BIT_DIGITAL  , CpsInp001+6, "p1 fire 3" },
 	{"P1 Rotate (digital)", BIT_DIGITAL, DrvFakeInput + 4,	"p1 fire 4"	},
+	{"P1 Shot Release"     , BIT_DIGITAL, DrvFakeInput1 + 0, "p1 fire 5"},
 	A("P1 Aim X", 		BIT_ANALOG_REL, &Analog[0],"p1 x-axis"),
 	A("P1 Aim Y", 		BIT_ANALOG_REL, &Analog[1],"p1 y-axis"),
 	A("P1 Spinner", 		BIT_ANALOG_REL, &Analog[4],"p1 nomap"),
@@ -795,9 +812,10 @@ static struct BurnInputInfo EcofghtrInputList[] = {
 	{"P2 Turn 1"        , BIT_DIGITAL  , CpsInp000+4, "p2 fire 1" },
 	{"P2 Attack"        , BIT_DIGITAL  , CpsInp000+5, "p2 fire 2" },
 	{"P2 Turn 2"        , BIT_DIGITAL  , CpsInp000+6, "p2 fire 3" },
-	{"P2 Rotate (digital)", BIT_DIGITAL,  DrvFakeInput + 5,	"p2 fire 4"	},
-	A("P2 Aim X", 		BIT_ANALOG_REL, &Analog[2],"p2 x-axis"),
-	A("P2 Aim Y", 		BIT_ANALOG_REL, &Analog[3],"p2 y-axis"),
+	{"P2 Rotate (digital)", BIT_DIGITAL, DrvFakeInput + 5,	"p2 fire 4"	},
+	{"P2 Shot Release"     , BIT_DIGITAL, DrvFakeInput1 + 1, "p2 fire 5"},
+	A("P2 Aim X", 		BIT_ANALOG_REL,  &Analog[2],"p2 x-axis"),
+	A("P2 Aim Y", 		BIT_ANALOG_REL,  &Analog[3],"p2 y-axis"),
 	A("P2 Spinner", 		BIT_ANALOG_REL, &Analog[5],"p2 nomap"),
 
 	{"Reset"            , BIT_DIGITAL  , &CpsReset  , "reset"     },
